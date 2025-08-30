@@ -1,0 +1,15 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Partidos en Vivo</title></head><body>
+<h1>Partidos en Vivo</h1><div id="list"></div>
+<script>
+  async function load(){
+    const res = await fetch('/api/partidos/?en_vivo=true');
+    const data = await res.json();
+    const list = document.getElementById('list'); list.innerHTML='';
+    data.forEach(p=>{
+      const d = document.createElement('div');
+      d.innerHTML = `<a href="/api/ui/partido/${p.id}/">` + (p.id+' - '+p.equipo_local+' vs '+p.equipo_visitante) + `</a>`;
+      list.appendChild(d);
+    });
+  }
+  load(); setInterval(load, 5000);
+</script></body></html>

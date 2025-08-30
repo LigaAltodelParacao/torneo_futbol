@@ -1,0 +1,81 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Control Partido</title></head><body>
+<h1>Control Partido: {{ partido }}</h1>
+<div>
+  <button id="startBtn">Iniciar 1er Tiempo (30:00)</button>
+  <button id="endPeriodBtn">Finalizar Tiempo</button>
+  <button id="startSecondBtn">Iniciar 2do Tiempo (30:00)</button>
+</div>
+<div><h3>Timer: <span id="timer">30:00</span></h3></div>
+<div>
+  <h3>Registrar Evento</h3>
+  <label>Jugador ID: <input id="jugador_id" /></label>
+  <label>Minuto: <input id="minuto" type="number" value="0" /></label>
+  <label>Tipo:
+    <select id="tipo">
+      <option value="gol">Gol</option>
+      <option value="amarilla">Amarilla</option>
+      <option value="roja">Roja</option>
+    </select>
+  </label>
+  <button id="sendEvent">Enviar Evento</button>
+</div>
+<script>
+  const partidoId = {{ partido.id }};
+  const proto = (location.protocol === 'https:') ? 'wss' : 'ws';
+  const ws = new WebSocket(proto + '://' + location.host + '/ws/partido/' + partidoId + '/');
+  ws.onopen = ()=>console.log('WS admin conectado');
+
+  async function postAction(action){
+    const res = await fetch(`/api/ui/api/partido/${partidoId}/toggle/`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({action})
+    });
+    return res.json();
+  }
+
+  document.getElementById('startBtn').onclick = async ()=>{
+    await postAction('start');
+    ws.send(JSON.stringify({type:'system', action:'start'}));
+    startTimer(30*60);
+  };
+  document.getElementById('endPeriodBtn').onclick = async ()=>{
+    await postAction('end_period');
+    ws.send(JSON.stringify({type:'system', action:'end_period'}));
+    stopTimer();
+  };
+  document.getElementById('startSecondBtn').onclick = async ()=>{
+    await postAction('start_second');
+    ws.send(JSON.stringify({type:'system', action:'start_second'}));
+    startTimer(30*60);
+  };
+
+  document.getElementById('sendEvent').onclick = async ()=>{
+    const jugador_id = document.getElementById('jugador_id').value;
+    const minuto = parseInt(document.getElementById('minuto').value||'0');
+    const tipo = document.getElementById('tipo').value;
+    const res = await fetch(`/api/ui/api/partido/${partidoId}/event/`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({jugador_id, minuto, tipo})
+    });
+    const data = await res.json();
+    ws.send(JSON.stringify({type:'evento', data}));
+    alert('Evento enviado');
+  };
+
+  let timerInterval = null;
+  function startTimer(seconds){
+    clearInterval(timerInterval);
+    let remaining = seconds;
+    timerInterval = setInterval(()=>{
+      if(remaining<=0){ clearInterval(timerInterval); alert('Tiempo terminado'); return;}
+      remaining -= 1;
+      const mm = String(Math.floor(remaining/60)).padStart(2,'0');
+      const ss = String(remaining%60).padStart(2,'0');
+      document.getElementById('timer').innerText = mm + ':' + ss;
+    }, 1000);
+  }
+  function stopTimer(){ clearInterval(timerInterval); }
+</script>
+</body></html>

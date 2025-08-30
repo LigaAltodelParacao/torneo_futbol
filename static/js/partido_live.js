@@ -1,0 +1,1 @@
+// utilidades de WebSocket (ejemplo)
