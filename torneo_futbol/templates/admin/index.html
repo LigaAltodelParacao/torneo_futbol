@@ -1,0 +1,93 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h2>Panel Admin</h2>
+
+<section class="grid-2">
+  <div class="card">
+    <h3>Categorías</h3>
+    <ul>
+      {% for c in cats %}
+        <li>{{ c.name }}
+          <form method="post" action="{{ url_for('admin_del_cat', cat_id=c.id) }}" class="inline">
+            <button>Eliminar</button>
+          </form>
+        </li>
+      {% else %}
+        <li>Sin categorías</li>
+      {% endfor %}
+    </ul>
+    <form method="post" action="{{ url_for('admin_add_cat') }}">
+      <input name="name" placeholder="Nueva categoría" required>
+      <button>Agregar</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Equipos</h3>
+    <ul>
+      {% for t in teams %}
+        <li>{{ t.name }} — <em>{{ t.category.name }}</em>
+          <a href="{{ url_for('admin_players', team_id=t.id) }}">👤 Jugadores</a>
+          <form method="post" action="{{ url_for('admin_del_team', team_id=t.id) }}" class="inline">
+            <button>Eliminar</button>
+          </form>
+        </li>
+      {% else %}
+        <li>Sin equipos</li>
+      {% endfor %}
+    </ul>
+    <form method="post" action="{{ url_for('admin_add_team') }}">
+      <input name="name" placeholder="Nombre del equipo" required>
+      <select name="category_id" required>
+        <option value="">Categoría…</option>
+        {% for c in cats %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+      </select>
+      <button>Agregar</button>
+    </form>
+  </div>
+</section>
+
+<div class="card">
+  <h3>Crear partido</h3>
+  <form method="post" action="{{ url_for('admin_match_new') }}" class="grid-4">
+    <label>Categoría
+      <select name="category_id" required>
+        {% for c in cats %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Local
+      <select name="home_team_id" required>
+        {% for t in teams %}<option value="{{ t.id }}">{{ t.name }} ({{ t.category.name }})</option>{% endfor %}
+      </select>
+    </label>
+    <label>Visitante
+      <select name="away_team_id" required>
+        {% for t in teams %}<option value="{{ t.id }}">{{ t.name }} ({{ t.category.name }})</option>{% endfor %}
+      </select>
+    </label>
+    <label>Cancha
+      <select name="venue_id" required>
+        {% for v in venues %}<option value="{{ v.id }}">{{ v.name }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Fecha y hora
+      <input type="datetime-local" name="date">
+    </label>
+    <button>Crear</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>Próximos / En juego</h3>
+  <ul>
+    {% for m in upcoming %}
+      <li>
+        <a href="{{ url_for('partido', match_id=m.id) }}">{{ m.category.name }} — {{ m.home_team.name }} vs {{ m.away_team.name }} ({{ m.venue.name }}) — {{ m.status }}</a>
+      </li>
+    {% else %}
+      <li>Sin partidos programados.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+{% endblock %}

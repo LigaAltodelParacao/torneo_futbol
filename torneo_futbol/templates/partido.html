@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h2>Partido</h2>
+<p>{{ partido.home_team_id }} vs {{ partido.away_team_id }}</p>
+<p>Cancha: {{ partido.cancha }} | Fecha: {{ partido.fecha }}</p>
+<p>Estado: {{ partido.status }}</p>
+
+<button id="btnIniciar">Iniciar Partido</button>
+<p>Tiempo: <span id="reloj">0</span> min</p>
+
+<h3>Agregar Evento</h3>
+<select id="tipo">
+    <option value="gol">Gol</option>
+    <option value="E/C">Gol en contra</option>
+    <option value="amarilla">Amarilla</option>
+    <option value="roja">Roja</option>
+</select>
+<select id="jugador">
+    <option value="">Seleccionar jugador</option>
+    {% for j in jugadores_local + jugadores_visitante %}
+        <option value="{{ j.id }}">{{ j.first_name }} {{ j.last_name }}</option>
+    {% endfor %}
+</select>
+<button id="btnEvento">Agregar Evento</button>
+
+<script>
+let tiempo = 0;
+let corriendo = false;
+let intervalo;
+
+document.getElementById('btnIniciar').onclick = () => {
+    if(!corriendo){
+        corriendo = true;
+        intervalo = setInterval(()=>{
+            tiempo++;
+            document.getElementById('reloj').innerText = tiempo;
+        }, 1000);
+        fetch('/iniciar_partido/{{ partido.id }}', {method:'POST'});
+    }
+}
+
+document.getElementById('btnEvento').onclick = () => {
+    let tipo = document.getElementById('tipo').value;
+    let player_id = document.getElementById('jugador').value;
+    if(!player_id && tipo != "E/C"){
+        alert('Jugador obligatorio');
+        return;
+    }
+    fetch('/agregar_evento/{{ partido.id }}', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({tipo, player_id, minuto: tiempo})
+    }).then(res=>res.json()).then(console.log);
+}
+</script>
+{% endblock %}

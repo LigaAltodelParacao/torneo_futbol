@@ -1,0 +1,74 @@
+<h2>{{ cat.name }}</h2>
+
+<h3>Equipos</h3>
+<ul class="grid">
+  {% for t in teams %}
+    <li class="card">{{ t.name }}</li>
+  {% else %}
+    <li>No hay equipos aún.</li>
+  {% endfor %}
+</ul>
+
+<h3>Tabla de posiciones</h3>
+<table>
+  <tr><th>#</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th></tr>
+  {% for i,row in enumerate(tabla, start=1) %}
+    <tr>
+      <td>{{ i }}</td>
+      <td>{{ row.team.name }}</td>
+      <td>{{ row.PJ }}</td><td>{{ row.G }}</td><td>{{ row.E }}</td><td>{{ row.P }}</td>
+      <td>{{ row.GF }}</td><td>{{ row.GC }}</td><td>{{ row.DG }}</td><td>{{ row.Pts }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="10">Sin datos</td></tr>
+  {% endfor %}
+</table>
+
+<h3>Goleadores</h3>
+<table>
+  <tr><th>Jugador</th><th>Equipo</th><th>Goles</th></tr>
+  {% for player, goles in goleadores %}
+    <tr><td>{{ player.last_name }} {{ player.first_name }}</td><td>{{ player.team.name }}</td><td>{{ goles }}</td></tr>
+  {% else %}
+    <tr><td colspan="3">Sin datos</td></tr>
+  {% endfor %}
+</table>
+
+<h3>Fair Play</h3>
+<table>
+  <tr><th>Equipo</th><th>Puntos Fair Play (⧁)</th></tr>
+  {% for team, puntos in fp %}
+    <tr><td>{{ team.name }}</td><td>{{ puntos or 0 }}</td></tr>
+  {% else %}
+    <tr><td colspan="2">Sin datos</td></tr>
+  {% endfor %}
+</table>
+<p class="muted">⧁ Amarilla=1, Roja=3. Menor es mejor.</p>
+
+<h3>Suspensiones (sugeridas)</h3>
+<table>
+  <tr><th>Jugador</th><th>Equipo</th><th>Motivo</th></tr>
+  {% for p, y, fechas in susp_y %}
+    <tr><td>{{ p.last_name }} {{ p.first_name }}</td><td>{{ p.team.name }}</td><td>{{ y }} amarillas ({{ fechas }} fecha{{ 's' if fechas>1 }})</td></tr>
+  {% endfor %}
+  {% for p, rojas in susp_r %}
+    <tr><td>{{ p.last_name }} {{ p.first_name }}</td><td>{{ p.team.name }}</td><td>{{ rojas }} roja(s) — susp. según informe</td></tr>
+  {% else %}
+    {% if not susp_y and not susp_r %}
+      <tr><td colspan="3">Sin sugerencias</td></tr>
+    {% endif %}
+  {% endfor %}
+</table>
+
+<h3>Partidos</h3>
+<div class="matches">
+  {% for m in matches %}
+    <a class="match" href="{{ url_for('partido', match_id=m.id) }}">
+      <div>{{ m.date.strftime('%d/%m/%Y %H:%M') }} — {{ m.venue.name }}</div>
+      <div>{{ m.home_team.name }} {{ m.home_score }} - {{ m.away_score }} {{ m.away_team.name }}</div>
+      <small>{{ m.status }}</small>
+    </a>
+  {% else %}
+    <p>Sin partidos.</p>
+  {% endfor %}
+</div>

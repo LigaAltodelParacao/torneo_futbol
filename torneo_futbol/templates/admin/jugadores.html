@@ -1,0 +1,47 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h2>Jugadores — {{ team.name }} ({{ team.category.name }})</h2>
+
+<div class="card">
+  <h3>Alta individual</h3>
+  <form method="post" action="{{ url_for('admin_players_add', team_id=team.id) }}" class="grid-4">
+    <input name="last_name" placeholder="Apellido" required>
+    <input name="first_name" placeholder="Nombre" required>
+    <input name="dni" placeholder="DNI">
+    <input type="date" name="birthdate" placeholder="Fecha de nacimiento">
+    <button>Agregar</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>Importar desde Excel</h3>
+  <form method="post" enctype="multipart/form-data" action="{{ url_for('admin_players_import', team_id=team.id) }}">
+    <input type="file" name="file" accept=".xlsx,.xls" required>
+    <button>Importar</button>
+    <p class="muted">Esperado: columnas “Apellido y Nombre”, “DNI”, “fecha de Nacimiento”.</p>
+  </form>
+</div>
+
+<div class="card">
+  <h3>Listado</h3>
+  <table>
+    <tr><th>Apellido</th><th>Nombre</th><th>DNI</th><th>Nacimiento</th><th></th></tr>
+    {% for p in players %}
+      <tr>
+        <td>{{ p.last_name }}</td>
+        <td>{{ p.first_name }}</td>
+        <td>{{ p.dni }}</td>
+        <td>{{ p.birthdate or '' }}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin_players_del', player_id=p.id) }}">
+            <button>Eliminar</button>
+          </form>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5">Sin jugadores.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+
+{% endblock %}

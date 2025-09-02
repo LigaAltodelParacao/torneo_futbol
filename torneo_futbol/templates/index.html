@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h2>Categorías</h2>
+<ul>
+{% for c in categorias %}
+    <li><a href="{{ url_for('ver_categoria', id=c.id) }}">{{ c.name }}</a></li>
+{% endfor %}
+</ul>
+{% endblock %}

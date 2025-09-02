@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h2>{{ categoria.name }}</h2>
+<h3>Equipos</h3>
+<ul>
+{% for equipo in categoria.equipos %}
+    <li>{{ equipo.name }}</li>
+{% endfor %}
+</ul>
+
+<h3>Partidos</h3>
+<ul>
+{% for equipo in categoria.equipos %}
+    {% for partido in equipo.partido_set %}
+        <li><a href="{{ url_for('ver_partido', id=partido.id) }}">
+            {{ partido.home_team_id }} vs {{ partido.away_team_id }} - {{ partido.fecha }} - {{ partido.cancha }}
+        </a></li>
+    {% endfor %}
+{% endfor %}
+</ul>
+{% endblock %}
